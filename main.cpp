@@ -6,7 +6,8 @@
 using namespace cv;
 using namespace std;
 
-#define DIPSLAY_IMAGES 1
+// Number of images to display, 0-2
+#define BLOSSOM_DEBUG_NUM_DIPSLAY_IMAGES 0
 
 void print_num_blossoms(int numBlossoms);
 void blob_fill_test(string path);
@@ -18,7 +19,7 @@ int main(int argc, char** argv )
     string processedImagePath = "C:/Users/10jos/OneDrive - Northwest Nazarene University/Research/BlossomCam/Processed_Images/prc0.jpg";
     Mat image;
 
-    if (DIPSLAY_IMAGES > 1)
+    if (BLOSSOM_DEBUG_NUM_DIPSLAY_IMAGES > 1)
     {
         // Make sure the original image exists
         image = imread(originalImagePath);
@@ -28,9 +29,9 @@ int main(int argc, char** argv )
             return -1;
         }
         resize(image, image, Size(), 0.5, 0.5);
-        namedWindow("Display Image");
-        imshow("Display Image", image);
-        waitKey(0);
+        namedWindow("Original Image");
+        imshow("Original Image", image);
+        // waitKey(0);
     }
 
     // ::::::::::::::::::::::
@@ -40,7 +41,7 @@ int main(int argc, char** argv )
     print_num_blossoms(numBlossoms);
 
 
-    if (DIPSLAY_IMAGES)
+    if (BLOSSOM_DEBUG_NUM_DIPSLAY_IMAGES)
     {
         image = imread(processedImagePath);
         if ( !image.data )
@@ -48,9 +49,9 @@ int main(int argc, char** argv )
             printf("No image data \n");
             return -1;
         }
-        // resize(image, image, Size(), 0.5, 0.5);
-        namedWindow("Display Image");
-        imshow("Display Image", image);
+        resize(image, image, Size(), 0.5, 0.5);
+        namedWindow("Filtered Image");
+        imshow("Filtered Image", image);
     }
 
     // Don't immediately exit program
