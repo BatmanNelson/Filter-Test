@@ -6,8 +6,9 @@
 
 // Debug variables
 #define BLOSSOM_DEBUG_IMAGE_COLOR false		// false
+#define BLOSSOM_DEBUG_RECURSION_NUM 2		// 2 (must be > 0)
 #define BLOSSOM_DEBUG_SHOW_BOXES true		// false
-#define BLOSSOM_DEBUG_SHOW_IMAGES true		// false
+#define BLOSSOM_DEBUG_SHOW_IMAGES false		// false (keep false if rec num is large)
 
 
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -118,7 +119,7 @@ cv::Mat blob_fill(std::string path)
     cv::Mat dst = cv::Mat::zeros(src.rows, src.cols, CV_8UC3);
     src = src > 1;
     // cv::namedWindow( "Source", 1 );
-    // cv::imshow( "Source", src );
+    // cv::cv::imshow( "Source", src );
     std::vector<std::vector<cv::Point>> contours;
     std::vector<cv::Vec4i> hierarchy;
     cv::findContours( src, contours, hierarchy,
@@ -133,7 +134,7 @@ cv::Mat blob_fill(std::string path)
         cv::drawContours( dst, contours, idx, color, cv::FILLED );
     }
     // cv::namedWindow( "Components", 1 );
-    // cv::imshow( "Components", dst );
+    // cv::cv::imshow( "Components", dst );
     // // cv::waitKey(0);
 
     return dst;
@@ -168,7 +169,7 @@ cv::Mat blob_fill(std::string path)
 //     // ///////////////////////////////////////////////////////////////////////
 
 //     // cv::namedWindow( "dst", 1 );
-//     // imshow( "dst", dst );
+//     // cv::imshow( "dst", dst );
 
 //     // cv::Mat drawing;
 //     // cv::cvtColor(binary2Image, drawing, cv::COLOR_GRAY2BGR);
@@ -196,7 +197,7 @@ cv::Mat remove_noise(cv::Mat src)
 // ::                                   ::                                   ::
 // ::                                   ::                                   ::
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-cv::Mat count_blobs(cv::Mat inputImage, int* numBlossoms, cv::Mat copyImage)
+cv::Mat count_blobs(cv::Mat inputImage, int* numBlossoms, cv::Mat copyImage, int itrNum)
 {
     int BlossomsDetected = 0;
 
@@ -206,10 +207,10 @@ cv::Mat count_blobs(cv::Mat inputImage, int* numBlossoms, cv::Mat copyImage)
     std::vector<cv::Vec4i> hierarchy;
     cv::findContours(binaryImage, contours, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE);
 
-    std::vector<std::vector<cv::Point> > contours_poly( contours.size() );
+    std::vector<std::vector<cv::Point>> contours_poly( contours.size() );
     std::vector<cv::Rect> boundRect( contours.size() );
 
-    // imshow("drawing0", drawing);
+    // cv::imshow("drawing0", drawing);
 
     // Converting image to bgr
     cv::Mat drawing;
@@ -228,7 +229,7 @@ cv::Mat count_blobs(cv::Mat inputImage, int* numBlossoms, cv::Mat copyImage)
             // cv::drawContours(drawing, contours, -1, color, cv::FILLED);
 
             // Only show boxes if debug is true
-            if (BLOSSOM_DEBUG_SHOW_BOXES)
+            if (BLOSSOM_DEBUG_SHOW_BOXES && (itrNum >= BLOSSOM_DEBUG_RECURSION_NUM - 1))
             {
                 cv::approxPolyDP( contours[pointer], contours_poly[pointer], 3, true );
                 boundRect[pointer] = boundingRect( contours_poly[pointer] );
@@ -251,7 +252,7 @@ cv::Mat count_blobs(cv::Mat inputImage, int* numBlossoms, cv::Mat copyImage)
     // Save number of blossoms
     *numBlossoms = BlossomsDetected;
 
-    // imshow("drawing", drawing);
+    // cv::imshow("drawing", drawing);
     // return ThresholdImage;
     return drawing;
 }
@@ -272,28 +273,44 @@ int filter_image_pre(std::string processedImagePath, std::string originalImagePa
     cv::Mat originalImage = cv::imread(originalImagePath);
     cv::Mat copyImage = cv::imread(originalImagePath);
 
-    cv::Mat binaryImage = binary_filter(originalImage, processedImagePath);
-    cv::Mat blobImage   = blob_fill(processedImagePath);
-    cv::Mat filterImage = remove_noise(blobImage);
-    // cv::Mat finalImage0  = count_blobs(filterImage, &numBlossoms, copyImage);
-    // cv::Mat binaryImage2 = binary_filter(finalImage0, processedImagePath);
-    // cv::Mat blobImage2   = blob_fill(processedImagePath);
-    // cv::Mat filterImage2 = remove_noise(blobImage2);
-    cv::Mat finalImage  = count_blobs(filterImage, &numBlossoms, copyImage);
+    cv::Mat binaryImage[BLOSSOM_DEBUG_RECURSION_NUM]; //= binary_filter(originalImage, processedImagePath);
+    cv::Mat blobImage[BLOSSOM_DEBUG_RECURSION_NUM];   //= blob_fill(processedImagePath);
+    cv::Mat filterImage[BLOSSOM_DEBUG_RECURSION_NUM]; //= remove_noise(blobImage);
+    // cv::Mat finalImage0 [BLOSSOM_DEBUG_RECURSION_NUM]; //= count_blobs(filterImage, &numBlossoms, copyImage);
+    // cv::Mat binaryImage2[BLOSSOM_DEBUG_RECURSION_NUM]; //= binary_filter(finalImage0, processedImagePath);
+    // cv::Mat blobImage2  [BLOSSOM_DEBUG_RECURSION_NUM]; //= blob_fill(processedImagePath);
+    // cv::Mat filterImage2[BLOSSOM_DEBUG_RECURSION_NUM]; //= remove_noise(blobImage2);
+    cv::Mat finalImage[BLOSSOM_DEBUG_RECURSION_NUM + 1];  //= count_blobs(filterImage, &numBlossoms, copyImage);
+
+    finalImage[0] = originalImage;
+
+    for (int i = 0; i < BLOSSOM_DEBUG_RECURSION_NUM; i++)
+    {
+        binaryImage[i] = binary_filter(finalImage[i], processedImagePath);
+        blobImage[i]   = blob_fill(processedImagePath);
+        filterImage[i] = remove_noise(blobImage[i]);
+        // finalImage0[i]  = count_blobs(filterImage, &numBlossoms, copyImage);
+        // binaryImage2[i] = binary_filter(finalImage0, processedImagePath);
+        // blobImage2[i]   = blob_fill(processedImagePath);
+        // filterImage2[i] = remove_noise(blobImage2);
+        finalImage[i + 1]  = count_blobs(filterImage[i], &numBlossoms, copyImage, i);
+    }
+    
 
     // Remove this on final
     if (BLOSSOM_DEBUG_SHOW_IMAGES)
     {
-        imshow("copyImage", copyImage);
-        imshow("finalImage", finalImage);
-        // imshow("filterImage2", filterImage2);
-        // imshow("blobImage2", blobImage2);
-        // imshow("binaryImage2", binaryImage2);
-        // imshow("finalImage0", finalImage0);
-        imshow("filterImage", filterImage);
-        imshow("blobImage", blobImage);
-        imshow("binaryImage", binaryImage);
-        imshow("originalImage", originalImage);
+        cv::imshow("copyImage", copyImage);
+
+        for (int i = BLOSSOM_DEBUG_RECURSION_NUM - 1; i >= 0; i--)
+        {
+            cv::imshow("finalImage "  + std::to_string(i), finalImage[i + 1]);
+            cv::imshow("filterImage " + std::to_string(i), filterImage[i]);
+            cv::imshow("blobImage "   + std::to_string(i), blobImage[i]);
+            cv::imshow("binaryImage " + std::to_string(i), binaryImage[i]);
+        }
+
+        cv::imshow("originalImage", originalImage);
     }
 
     // Write to processed image file
@@ -303,7 +320,7 @@ int filter_image_pre(std::string processedImagePath, std::string originalImagePa
     }
     else
     {
-        cv::imwrite(processedImagePath, finalImage);
+        cv::imwrite(processedImagePath, finalImage[BLOSSOM_DEBUG_RECURSION_NUM]);////////////
     }
 
     return numBlossoms;

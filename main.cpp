@@ -7,7 +7,7 @@ using namespace cv;
 using namespace std;
 
 // Number of images to display, 0-2
-#define BLOSSOM_DEBUG_NUM_DIPSLAY_IMAGES 0	// 2
+#define BLOSSOM_DEBUG_NUM_DIPSLAY_IMAGES 2	// 2
 
 void print_num_blossoms(int numBlossoms);
 void blob_fill_test(string path);
@@ -15,7 +15,7 @@ void blob_fill_test(string path);
 
 int main(int argc, char** argv )
 {
-    string originalImagePath  = "C:/Users/10jos/OneDrive - Northwest Nazarene University/Research/BlossomCam/Original_Images/eg3.jpg";
+    string originalImagePath  = "C:/Users/10jos/OneDrive - Northwest Nazarene University/Research/BlossomCam/Original_Images/eg7.jpg";
     string processedImagePath = "C:/Users/10jos/OneDrive - Northwest Nazarene University/Research/BlossomCam/Processed_Images/prc0.jpg";
     Mat image;
 
