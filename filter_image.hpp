@@ -5,8 +5,9 @@
 */
 
 // Debug variables
-#define BLOSSOM_DEBUG_SHOW_BOXES true
-#define BLOSSOM_DEBUG_SHOW_IMAGES true
+#define BLOSSOM_DEBUG_IMAGE_COLOR false		// false
+#define BLOSSOM_DEBUG_SHOW_BOXES true		// false
+#define BLOSSOM_DEBUG_SHOW_IMAGES true		// false
 
 
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -195,7 +196,7 @@ cv::Mat remove_noise(cv::Mat src)
 // ::                                   ::                                   ::
 // ::                                   ::                                   ::
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-cv::Mat count_blobs(cv::Mat inputImage, int* numBlossoms)
+cv::Mat count_blobs(cv::Mat inputImage, int* numBlossoms, cv::Mat copyImage)
 {
     int BlossomsDetected = 0;
 
@@ -234,6 +235,9 @@ cv::Mat count_blobs(cv::Mat inputImage, int* numBlossoms)
 
                 cv::Scalar color = cv::Scalar(50 + rand() % 206, 50 + rand() % 206, 50 + rand() % 206);
                 cv::rectangle( drawing, boundRect[pointer].tl(), boundRect[pointer].br(), color, 2 );
+
+                // Remove this//////////////////////////////////////////////////
+                cv::rectangle( copyImage, boundRect[pointer].tl(), boundRect[pointer].br(), color, 2 );
             }
         }
         // If not, make the contour black
@@ -266,19 +270,26 @@ int filter_image_pre(std::string processedImagePath, std::string originalImagePa
 
     // Filter the image using the algorithm
     cv::Mat originalImage = cv::imread(originalImagePath);
+    cv::Mat copyImage = cv::imread(originalImagePath);
 
     cv::Mat binaryImage = binary_filter(originalImage, processedImagePath);
     cv::Mat blobImage   = blob_fill(processedImagePath);
     cv::Mat filterImage = remove_noise(blobImage);
-    // cv::Mat binaryImage2 = binary_filter(blobImage, processedImagePath);
+    // cv::Mat finalImage0  = count_blobs(filterImage, &numBlossoms, copyImage);
+    // cv::Mat binaryImage2 = binary_filter(finalImage0, processedImagePath);
     // cv::Mat blobImage2   = blob_fill(processedImagePath);
     // cv::Mat filterImage2 = remove_noise(blobImage2);
-    cv::Mat finalImage  = count_blobs(filterImage, &numBlossoms);
+    cv::Mat finalImage  = count_blobs(filterImage, &numBlossoms, copyImage);
 
     // Remove this on final
     if (BLOSSOM_DEBUG_SHOW_IMAGES)
     {
+        imshow("copyImage", copyImage);
         imshow("finalImage", finalImage);
+        // imshow("filterImage2", filterImage2);
+        // imshow("blobImage2", blobImage2);
+        // imshow("binaryImage2", binaryImage2);
+        // imshow("finalImage0", finalImage0);
         imshow("filterImage", filterImage);
         imshow("blobImage", blobImage);
         imshow("binaryImage", binaryImage);
@@ -286,7 +297,14 @@ int filter_image_pre(std::string processedImagePath, std::string originalImagePa
     }
 
     // Write to processed image file
-    cv::imwrite(processedImagePath, finalImage);//finalImage);
+    if (BLOSSOM_DEBUG_IMAGE_COLOR)
+    {
+        cv::imwrite(processedImagePath, copyImage);
+    }
+    else
+    {
+        cv::imwrite(processedImagePath, finalImage);
+    }
 
     return numBlossoms;
 }
