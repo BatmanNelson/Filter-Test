@@ -8,4 +8,4 @@ I used [this](https://youtu.be/m9HBM1m_EMU) tutorial on youtube to setup the pro
 
 ## Notes
 
-The file "filter_image_v0.hpp" is the original image filter.
+The file [filter_image_v0.hpp](filter_image_v0.hpp) is the original image filter.
