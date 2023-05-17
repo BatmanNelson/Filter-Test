@@ -1,62 +1,69 @@
+// Program made to call "filter_image.hpp"
+
 #include <stdio.h>
 #include <opencv2/opencv.hpp>
 #include "filter_image.hpp"
-// #include "filter_image_v0.hpp"// Original filter
 
 using namespace cv;
 using namespace std;
 
-#define DIPSLAY_IMAGES 1
+// Number of images to display, 0-2         // Default Value:
+#define BLOSSOM_DEBUG_NUM_DIPSLAY_IMAGES 2	// 2
 
+// Function declarations
 void print_num_blossoms(int numBlossoms);
 void blob_fill_test(string path);
 
 
-int main(int argc, char** argv )
+int main(void)
 {
-    string originalImagePath  = "C:/Users/10jos/OneDrive - Northwest Nazarene University/Research/BlossomCam/Original_Images/eg7.jpg";
-    string processedImagePath = "C:/Users/10jos/OneDrive - Northwest Nazarene University/Research/BlossomCam/Processed_Images/prc0.jpg";
+    // Path variables need to be changed to be actual paths
+    string originalImagePath  = "path to original image";
+    string processedImagePath = "path to where the processed image should go";
     Mat image;
 
-    if (DIPSLAY_IMAGES > 1)
+    // Make sure the original image exists
+    image = imread(originalImagePath);
+    if ( !image.data )
     {
-        // Make sure the original image exists
-        image = imread(originalImagePath);
-        if ( !image.data )
-        {
-            printf("No image data\n");
-            return -1;
-        }
-        resize(image, image, Size(), 0.5, 0.5);
-        namedWindow("Display Image");
-        imshow("Display Image", image);
-        waitKey(0);
+        // If the image does not exist, close program
+        printf("No original image data\n");
+        return -1;
     }
 
-    // ::::::::::::::::::::::
-    // Process image       ::
-    // ::::::::::::::::::::::
+    // Dispaly original image only if num display is greater than one
+    if (BLOSSOM_DEBUG_NUM_DIPSLAY_IMAGES > 1)
+    {
+        resize(image, image, Size(), 0.5, 0.5);
+        namedWindow("Original Image");
+        imshow("Original Image", image);
+    }
+
+
+
+    // Process image and print number of blossoms
     int numBlossoms = filter_image_pre(processedImagePath, originalImagePath);
     print_num_blossoms(numBlossoms);
 
 
-    if (DIPSLAY_IMAGES)
+
+    // Dispaly processed image only if num display is greater not 0
+    if (BLOSSOM_DEBUG_NUM_DIPSLAY_IMAGES)
     {
+        // Make sure the processed image exists before printing it
         image = imread(processedImagePath);
         if ( !image.data )
         {
-            printf("No image data \n");
-            return -1;
+            printf("No processed image data\n");
+            return -2;
         }
-        // resize(image, image, Size(), 0.5, 0.5);
-        namedWindow("Display Image");
-        imshow("Display Image", image);
+        resize(image, image, Size(), 0.5, 0.5);
+        namedWindow("Filtered Image");
+        imshow("Filtered Image", image);
+
+        // Don't immediately exit program so the user can see the images
+        waitKey(0);
     }
-
-    // Don't immediately exit program
-    waitKey(0);
-
-    // blob_fill_test(processedImagePath);//temp
 
     return 0;
 }
