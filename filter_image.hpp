@@ -44,9 +44,9 @@
 
 
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-// ::                                   ::                                   ::
+// ::                                                                        ::
 // ::                Function to convert a bgr image to binary               ::
-// ::                                   ::                                   ::
+// ::                                                                        ::
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 cv::Mat bgr_to_bin(cv::Mat bgrImage)
 {
@@ -71,9 +71,9 @@ cv::Mat bgr_to_bin(cv::Mat bgrImage)
 
 
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-// ::                                   ::                                   ::
+// ::                                                                        ::
 // ::          Filter the image based on saturation to get b/w image         ::
-// ::                                   ::                                   ::
+// ::                                                                        ::
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 cv::Mat binary_filter(cv::Mat inputImage, std::string blobImagePath)
 {
@@ -111,9 +111,9 @@ cv::Mat binary_filter(cv::Mat inputImage, std::string blobImagePath)
 
 
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-// ::                                   ::                                   ::
+// ::                                                                        ::
 // ::                        Function to fill in blobs                       ::
-// ::                                   ::                                   ::
+// ::                                                                        ::
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 // Modified from:
 // https://docs.opencv.org/4.7.0/d6/d6e/group__imgproc__draw.html#ga746c0625f1781f1ffc9056259103edbc
@@ -147,9 +147,9 @@ cv::Mat blob_fill(std::string path)
 
 
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-// ::                                   ::                                   ::
+// ::                                                                        ::
 // ::                         Remove noise from image                        ::
-// ::                                   ::                                   ::
+// ::                                                                        ::
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 cv::Mat remove_noise(cv::Mat src)
 {
@@ -163,9 +163,9 @@ cv::Mat remove_noise(cv::Mat src)
 
 
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-// ::                                   ::                                   ::
+// ::                                                                        ::
 // ::        Count blobs of a particular size and make the rest black        ::
-// ::                                   ::                                   ::
+// ::                                                                        ::
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 cv::Mat count_blobs(cv::Mat inputImage, int* numBlossoms, cv::Mat copyImage, int itrNum)
 {
@@ -196,7 +196,7 @@ cv::Mat count_blobs(cv::Mat inputImage, int* numBlossoms, cv::Mat copyImage, int
             // Add one to number of counted blossoms
             BlossomsDetected = BlossomsDetected + 1;
 
-            // Only show boxes if debug is true
+            // Only show boxes if debug is true and it's the last iteration
             if (BLOSSOM_DEBUG_SHOW_BOXES && (itrNum >= BLOSSOM_DEBUG_RECURSION_NUM - 1))
             {
                 // Find the bounding rectangle of the contours
@@ -226,9 +226,9 @@ cv::Mat count_blobs(cv::Mat inputImage, int* numBlossoms, cv::Mat copyImage, int
 
 
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-// ::                                   ::                                   ::
+// ::                                                                        ::
 // ::                 Filter the image using multiple filters                ::
-// ::                                   ::                                   ::
+// ::                                                                        ::
 // ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 int filter_image_pre(std::string processedImagePath, std::string originalImagePath)
 {
